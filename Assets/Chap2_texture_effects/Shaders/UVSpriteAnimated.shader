@@ -41,7 +41,7 @@ Shader "Custom/Chapter2/UVSpriteAnimated"
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             float2 spriteUV = IN.uv_MainTex;
-            float2 cellUV = 1/_CellAmount;
+            const float2 cellUV = 1/_CellAmount;
 
             float frame = fmod(_Time.y * _Speed, _CellAmount);
             frame = floor(frame);
