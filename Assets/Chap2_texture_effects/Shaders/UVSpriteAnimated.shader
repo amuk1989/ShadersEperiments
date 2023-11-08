@@ -1,11 +1,11 @@
-Shader "Custom/Chapter2/UVSprite"
+Shader "Custom/Chapter2/UVSpriteAnimated"
 {
     Properties
     {
         _MainTint ("Diffuse Tint", Color) = (1,1,1,1)
         _MainTex ("Base (RGB)", 2D) = "white" {}
-        _ScrollXSpeed ("X Scroll Speed", Range(0,10)) = 2
-        _ScrollYSpeed ("Y Scroll Speed", Range(0,10)) = 2
+        _CellAmount ("Cell Amount", float) = 0.0
+        _Speed ("Speed", Range(0.01, 32)) = 12
     }
     SubShader
     {
@@ -27,6 +27,8 @@ Shader "Custom/Chapter2/UVSprite"
         fixed4 _MainTint;
         fixed _ScrollXSpeed;
         fixed _ScrollYSpeed;
+        fixed _CellAmount;
+        fixed _Speed;
         sampler2D _MainTex;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
@@ -38,15 +40,16 @@ Shader "Custom/Chapter2/UVSprite"
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            // Albedo comes from a texture tinted by color
-            fixed2 scrolledUV = IN.uv_MainTex;
+            float2 spriteUV = IN.uv_MainTex;
+            float2 cellUV = 1/_CellAmount;
 
-            fixed xScrollValue = _ScrollXSpeed * _Time.x;
-            fixed yScrollValue = _ScrollYSpeed * _Time.x;
+            float frame = fmod(_Time.y * _Speed, _CellAmount);
+            frame = floor(frame);
 
-            scrolledUV += fixed2(xScrollValue, yScrollValue);
+            float xValue = (spriteUV.x + frame) * cellUV;
+            spriteUV = float2(xValue, spriteUV.y);
 
-            half4 c = tex2D(_MainTex, scrolledUV);
+            half4 c = tex2D(_MainTex, spriteUV);
             
             o.Albedo = c.rgb * _MainTint;
             o.Alpha = c.a;
